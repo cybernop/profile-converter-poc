@@ -11,10 +11,12 @@ class XmlBundle:
         file:   File to read the bundle from
     """
 
-    def __init__(self, file: str | Path = None) -> None:
+    def __init__(self, bundle: Bundle = None, file: str | Path = None) -> None:
         self.__bundle: Bundle = None
 
-        if file:
+        if bundle:
+            self.__bundle = bundle
+        elif file:
             if not isinstance(file, Path):
                 file = Path(file)
 
@@ -30,3 +32,7 @@ class XmlBundle:
 
         content = self.__bundle.xml(pretty_print=True)
         file.write_text(content)
+
+    @property
+    def bundle(self) -> Bundle:
+        return self.__bundle

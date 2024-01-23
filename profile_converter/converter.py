@@ -1,7 +1,8 @@
 from pathlib import Path
 
-from bundle import XmlBundle
+from fhir.resources.R4B.bundle import Bundle, BundleEntry
 
+from bundle import XmlBundle
 from mapping import ProfilesMappings
 
 
@@ -17,7 +18,7 @@ class ProfileConverter:
         """
         Convert profiles from a XML file using the mappings
         """
-        input_bundle = XmlBundle(file)
+        input_bundle = XmlBundle(file=file)
         output_bundle = self.__convert_helper(input_bundle)
         output_bundle.write(output_path / file.name)
 
@@ -25,4 +26,19 @@ class ProfileConverter:
         """
         Helper function to handle the actual conversion
         """
-        return bundle
+
+        result_bundle = Bundle(type=bundle.bundle.type)
+
+        # Needs to be checked: this is not definied in the mapping
+        result_bundle.identifier = bundle.bundle.identifier
+
+        result_bundle.entry = []
+        for entry in bundle.bundle.entry:
+            result_entry = self.__convert_entry(entry)
+            if result_entry:
+                result_bundle.entry.append(result_entry)
+
+        return XmlBundle(bundle=result_bundle)
+
+    def __convert_entry(self, entry: BundleEntry) -> BundleEntry | None:
+        return BundleEntry(resource=entry.resource)
